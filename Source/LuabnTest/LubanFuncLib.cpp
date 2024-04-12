@@ -7,14 +7,14 @@
 
 void ULubanFuncLib::Init()
 {
-	auto ProjectRootPath = std::string(TCHAR_TO_UTF8(*FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir())));
+	auto ProjectRootPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir());
 
-	GEngine->AddOnScreenDebugMessage(-1, 30.f, FColor::Red, FString::Printf(TEXT("%hs"), ProjectRootPath.c_str()));
-	cfg::Tables tables;	
+	GEngine->AddOnScreenDebugMessage(-1, 30.f, FColor::Red, FString::Printf(TEXT("%s"), *ProjectRootPath));
+	cfg::Tables tables;
 	if (tables.load([&ProjectRootPath](::luban::ByteBuf& buf, const std::string& s)
 	{
 		TArray<uint8> bytes;
-		auto addr = FString(UTF8_TO_TCHAR((ProjectRootPath + "/Bytes/" + s + ".bytes").c_str()));
+		auto addr = FString::Printf(TEXT("%ls/Bytes/%hs.bytes"), *ProjectRootPath, s.c_str());
 		GEngine->AddOnScreenDebugMessage(-1, 30.f, FColor::Red, FString::Printf(TEXT("== luban load addr == %s"), *addr));
 		if (FFileHelper::LoadFileToArray(bytes, *addr))
 		{
@@ -22,8 +22,7 @@ void ULubanFuncLib::Init()
 			return true;
 		};
 		return false;
-		// return buf.loadFromFile(ProjectRootPath + "/Bytes/" + s + ".bytes");
-	}))
+	}))		
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 30.f, FColor::Red, FString::Printf(TEXT("== luban load succ == %llu"), tables.TbCharacterData.getDataList().size()));
 		UE_LOG(LogTemp, Log, TEXT("== luban load succ == %llu"), tables.TbCharacterData.getDataList().size());
